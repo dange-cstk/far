@@ -25,11 +25,12 @@ jira-bug-analysis/
     repos.json                 # repo registry + mapping hints (extend to add repos)
     report-template.md         # First Analysis Report structure
   scripts/
-    setup-repos.sh             # clone/refresh core & apps repos
+    setup-repos.sh             # add/init the core & apps repos as submodules
 ```
 
-Repos are cloned into `<workspace>/core/*` and `<workspace>/apps/*` where
-`<workspace>` defaults to `$HOME` and is overridable via `BUG_ANALYSIS_WORKSPACE`.
+The analysis repos are **git submodules** of this repo, under `core/` and
+`apps/` at the repo root. Populate them with `git submodule update --init
+--recursive` or the setup script.
 
 ## Usage
 
@@ -42,9 +43,10 @@ or just: "Analyze the bug in DX-1234 and propose a fix."
 ## Requirements & notes
 
 - The Atlassian (Rovo) MCP must be connected for Jira access.
-- **Private repos only clone in a session that has them in scope.** In a session
-  scoped to a different owner, `setup-repos.sh` will clone the public repos and
-  report the private ones as out-of-scope — start the session with the target
-  repos attached (or as sources) to analyze them.
+- **Private repos only initialize in an environment with access to them.** In a
+  session scoped to a different owner, `setup-repos.sh` adds/inits the public
+  submodule and reports the private ones as out-of-scope. Run it locally or in a
+  session scoped to those repos to complete the private submodules, then commit
+  the `.gitmodules` change.
 - Add more repos by appending to `references/repos.json` and the `REPOS` array in
   `scripts/setup-repos.sh`.

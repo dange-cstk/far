@@ -21,20 +21,26 @@ branch and open a **draft** pull request.
 - **Jira access** via the Atlassian (Rovo) MCP. Resolve the cloud/site with
   `getAccessibleAtlassianResources` once, then reuse the `cloudId`. For
   Contentstack that is `contentstack.atlassian.net`.
-- **Target repos cloned locally** under the two-group layout below. If they are
-  missing, run `scripts/setup-repos.sh` (see step 3). Repos must be in the
-  session's scope for the private ones to clone.
+- **Target repos present as git submodules** of this repo, in the two-group
+  layout below (paths are relative to the repo root):
 
 ```
-<workspace>/core/developerhub-ui
-<workspace>/core/marketplace-ui
-<workspace>/apps/marketplace-jsoneditor-app
-<workspace>/apps/marketplace-brightcove-app
+core/developerhub-ui
+core/marketplace-ui
+apps/marketplace-jsoneditor-app
+apps/marketplace-brightcove-app
 ```
 
-`<workspace>` defaults to `$HOME` (e.g. `/home/user`) and can be overridden with
-the `BUG_ANALYSIS_WORKSPACE` env var. `references/repos.json` is the registry of
-repos, their group, clone path, and mapping hints — extend it to add more repos.
+  Populate/refresh them with `git submodule update --init --recursive`, or run
+  `.claude/skills/jira-bug-analysis/scripts/setup-repos.sh`, which also *adds*
+  any submodule not yet registered. `references/repos.json` is the registry of
+  repos, their group, submodule path, and mapping hints — extend it (and the
+  `REPOS` array in the setup script) to add more repos.
+
+  Adding/cloning the **private** repos requires a git environment with access
+  to them (org credentials, or a Claude Code session scoped to those repos). In
+  a session scoped to a different owner they cannot be fetched — say so rather
+  than guessing at code you cannot read.
 
 ## Default behavior
 
@@ -71,18 +77,23 @@ Pull out the concrete signals you will use to locate code:
 - any linked PRs or commits (via `getJiraIssueRemoteIssueLinks`).
 
 ### 3. Ensure repos are present
-Check the paths in `references/repos.json`. If any are missing, run:
+The repos are git submodules under `core/` and `apps/`. Initialize/refresh them:
 
 ```
-bash scripts/setup-repos.sh
+git submodule update --init --recursive
+# or, which also adds any not-yet-registered submodule:
+bash .claude/skills/jira-bug-analysis/scripts/setup-repos.sh
 ```
 
-For repos that exist, refresh them so analysis runs against the latest default
+Then refresh the relevant submodule so analysis runs against the latest default
 branch:
 
 ```
-git -C <repo-path> fetch origin && git -C <repo-path> checkout <default-branch> && git -C <repo-path> pull --ff-only
+git -C <path> fetch origin && git -C <path> checkout <default-branch> && git -C <path> pull --ff-only
 ```
+
+If a private repo can't be fetched (session not scoped to it), stop and report
+that — do not analyze code you cannot read.
 
 ### 4. Locate the target repo (infer → confirm)
 Rank the candidate repos using, in order of strength:
@@ -106,7 +117,7 @@ In the confirmed repo:
 
 ### 6. Write the First Analysis Report
 Fill in `references/report-template.md`. Save it as
-`<workspace>/<TICKET>-analysis.md` and show a summary to the user. This report
+`reports/<TICKET>-analysis.md` (gitignored) and show a summary to the user. This report
 is the primary deliverable and must stand on its own even if no fix is made.
 
 ### 7. Implement the fix (gated)

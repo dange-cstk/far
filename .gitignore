@@ -1,0 +1,3 @@
+# Analysis reports produced by the jira-bug-analysis skill
+/reports/
+*-analysis.md

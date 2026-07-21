@@ -1,70 +1,67 @@
 #!/usr/bin/env bash
 #
-# setup-repos.sh — clone/refresh the repos used by the jira-bug-analysis skill
-# into a two-group layout:
+# setup-repos.sh — ensure the analysis repos are present as git submodules of
+# THIS repo, in a two-group layout:
 #
-#   $WORKSPACE/core/<repo>   (developerhub-ui, marketplace-ui)
-#   $WORKSPACE/apps/<repo>   (marketplace-jsoneditor-app, marketplace-brightcove-app)
+#   core/developerhub-ui           core/marketplace-ui
+#   apps/marketplace-jsoneditor-app  apps/marketplace-brightcove-app
 #
-# WORKSPACE defaults to $HOME; override with BUG_ANALYSIS_WORKSPACE.
-# Repos already present are fetched (not re-cloned). The repo list mirrors
-# references/repos.json — keep them in sync when adding repos.
+# Behavior per repo:
+#   - already registered in .gitmodules -> `git submodule update --init`
+#   - not yet registered              -> `git submodule add <url> <path>`
 #
-# Clone URLs use https://github.com/... on purpose: the session's git proxy
-# rewrites them (url.<proxy>.insteadOf=https://github.com/). Private repos only
-# clone in a session that has them in scope.
+# Adding the private repos requires a git environment that has access to them
+# (org SSH key or token / an appropriately-scoped Claude Code session). If a
+# repo can't be reached, it's reported and the script keeps going. After the
+# script adds new submodules, commit the resulting .gitmodules + gitlink change.
+#
+# URLs use https://github.com/... for portability; switch to git@github.com:
+# form if your environment authenticates over SSH.
 
 set -uo pipefail
 
-WORKSPACE="${BUG_ANALYSIS_WORKSPACE:-$HOME}"
-CORE_DIR="$WORKSPACE/core"
-APPS_DIR="$WORKSPACE/apps"
-DEPTH="${CLONE_DEPTH:-1}"   # set CLONE_DEPTH=0 (or unset) for a full clone
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "!! run inside the repo"; exit 1; }
+cd "$ROOT"
 
-# group  repo                          clone-url
+# group/path|https-url
 REPOS=(
-  "core|developerhub-ui|https://github.com/contentstack/developerhub-ui.git"
-  "core|marketplace-ui|https://github.com/contentstack/marketplace-ui.git"
-  "apps|marketplace-jsoneditor-app|https://github.com/contentstack/marketplace-jsoneditor-app.git"
-  "apps|marketplace-brightcove-app|https://github.com/contentstack/marketplace-brightcove-app.git"
+  "core/developerhub-ui|https://github.com/contentstack/developerhub-ui.git"
+  "core/marketplace-ui|https://github.com/contentstack/marketplace-ui.git"
+  "apps/marketplace-jsoneditor-app|https://github.com/contentstack/marketplace-jsoneditor-app.git"
+  "apps/marketplace-brightcove-app|https://github.com/contentstack/marketplace-brightcove-app.git"
 )
 
-mkdir -p "$CORE_DIR" "$APPS_DIR"
-
-ok=0; failed=0
+added=0; inited=0; failed=0
 for entry in "${REPOS[@]}"; do
-  IFS='|' read -r group name url <<<"$entry"
-  case "$group" in
-    core) dest="$CORE_DIR/$name" ;;
-    apps) dest="$APPS_DIR/$name" ;;
-    *)    echo "!! unknown group '$group' for $name"; failed=$((failed+1)); continue ;;
-  esac
-
-  if [ -d "$dest/.git" ]; then
-    echo ">> refreshing $group/$name"
-    if GIT_TERMINAL_PROMPT=0 git -C "$dest" fetch --all --prune; then
-      ok=$((ok+1))
+  IFS='|' read -r path url <<<"$entry"
+  if git config -f .gitmodules --get "submodule.$path.url" >/dev/null 2>&1; then
+    echo ">> init/update $path"
+    if GIT_TERMINAL_PROMPT=0 git submodule update --init -- "$path"; then
+      inited=$((inited+1))
     else
-      echo "!! fetch failed for $group/$name"; failed=$((failed+1))
+      echo "!! could not init $path (no access in this environment?)"; failed=$((failed+1))
     fi
   else
-    echo ">> cloning $group/$name"
-    depth_args=()
-    [ "$DEPTH" != "0" ] && depth_args=(--depth "$DEPTH")
-    if GIT_TERMINAL_PROMPT=0 git clone "${depth_args[@]}" "$url" "$dest"; then
-      ok=$((ok+1))
+    echo ">> add $path"
+    if GIT_TERMINAL_PROMPT=0 git submodule add "$url" "$path"; then
+      added=$((added+1))
     else
-      echo "!! clone failed for $group/$name (is it in this session's scope?)"
-      rmdir "$dest" 2>/dev/null || true
-      failed=$((failed+1))
+      echo "!! could not add $path (no access in this environment?)"; failed=$((failed+1))
+      # leave no half-written .gitmodules entry behind
+      git submodule deinit -f -- "$path" >/dev/null 2>&1 || true
+      git config -f .gitmodules --remove-section "submodule.$path" >/dev/null 2>&1 || true
     fi
   fi
 done
 
 echo
 echo "=== setup-repos summary ==="
-echo "workspace: $WORKSPACE"
-echo "ok: $ok   failed: $failed"
-echo "core: $(ls -1 "$CORE_DIR" 2>/dev/null | tr '\n' ' ')"
-echo "apps: $(ls -1 "$APPS_DIR" 2>/dev/null | tr '\n' ' ')"
+echo "added: $added   init/updated: $inited   failed: $failed"
+echo "core: $(ls -1 core 2>/dev/null | tr '\n' ' ')"
+echo "apps: $(ls -1 apps 2>/dev/null | tr '\n' ' ')"
+if [ "$added" -gt 0 ]; then
+  echo
+  echo "New submodules were added. Commit them with:"
+  echo "  git add .gitmodules core apps && git commit -m 'Add analysis repos as submodules'"
+fi
 [ "$failed" -eq 0 ]
