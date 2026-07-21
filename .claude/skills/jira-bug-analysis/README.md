@@ -7,8 +7,10 @@ and opens a **draft pull request**.
 ## What it does
 
 1. Fetches the ticket from Jira (Atlassian Rovo MCP).
-2. Determines the target GitHub repo — **inferring it from the ticket**, or
-   **asking you for the repo URL** when it isn't sure.
+2. Determines the target GitHub repo — from a link in the ticket, or by
+   **discovering it at runtime** (searching the `contentstack` org live and
+   matching the ticket), or by **asking you for the repo URL** when unsure. No
+   repo list is committed, so nothing goes stale.
 3. **Clones that repo at runtime** into a gitignored `work/` dir.
 4. Reads the code, root-causes the bug, and writes a structured report.
 5. Optionally implements a minimal fix on a branch and opens a draft PR.
@@ -28,6 +30,7 @@ jira-bug-analysis/
   references/
     report-template.md         # First Analysis Report structure
   scripts/
+    list-repos.sh              # runtime discovery: list contentstack org repos to match a ticket
     clone-repo.sh              # runtime clone of a given repo into work/<name>
 ```
 
@@ -48,6 +51,9 @@ repo URL (a full URL or `owner/repo` shorthand), then clone it.
 - The environment needs git access to the target repo (public, or an SSH
   key / token with org access for private repos). If a clone fails for lack of
   access, the skill reports it rather than guessing.
+- Runtime repo discovery uses the org repo listing via the `gh` CLI, a
+  `$GH_TOKEN`/`$GITHUB_TOKEN`, or the GitHub MCP `search_repositories`. If none
+  is available, the skill asks you for the repo URL.
 - **Version bump:** when the target repo is a marketplace *app* (detected by a
   `@contentstack/app-sdk` dependency), a fix also bumps `package.json` (patch by
   default). Platform/library repos are not bumped.

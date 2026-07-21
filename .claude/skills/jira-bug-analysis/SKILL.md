@@ -59,13 +59,25 @@ Extract the concrete signals used to locate the repo and code:
 - error messages / stack traces (file names, functions, line numbers),
 - component / label names, feature names, route paths, versions.
 
-### 3. Determine the target repo (infer → else ask)
+### 3. Determine the target repo (infer → discover → else ask)
+Do **not** rely on any hardcoded repo list — repos change over time. Resolve the
+repo live:
 1. If the ticket **links or names a repo / PR / commit**, use that repo.
-2. Otherwise infer from strong signals (a distinctive file path, symbol, or
-   error string, or an unambiguous component/product name) and state your
-   reasoning.
-3. **If you are not confident, ask the user for the GitHub repo URL** (accept a
-   full URL, or `owner/repo` shorthand). Do not guess a repo you cannot justify.
+2. Otherwise **discover it at runtime by searching the `contentstack` org.**
+   Derive keywords from the ticket (app / feature / product name, component or
+   label, module or package name from a stack trace) and search with whatever
+   GitHub tooling is available:
+   - GitHub MCP `search_repositories` with `org:contentstack <keywords>` (and/or
+     the repo-list tools), or
+   - `gh search repos --owner contentstack <keywords>` / `gh repo list contentstack`, or
+   - the helper `.claude/skills/jira-bug-analysis/scripts/list-repos.sh [keywords...]`.
+
+   Focus candidates on the marketplace **apps** (e.g. `marketplace-*`, `*-app`,
+   and standalone apps such as `custom-asset-field`), plus `marketplace-ui` and
+   the **developerhub** repos. Rank candidates by how well the repo name / topics
+   / description match the ticket, and state your reasoning.
+3. **If nothing matches confidently, ask the user for the GitHub repo URL**
+   (full URL or `owner/repo` shorthand). Never guess a repo you cannot justify.
 
 ### 4. Clone the repo at runtime
 Clone the chosen repo into a gitignored working dir with the helper:
