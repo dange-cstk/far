@@ -1,11 +1,11 @@
 {
-  "$comment": "Registry of repositories the jira-bug-analysis skill analyzes. Each repo is a git submodule of this repo at 'path' (relative to the repo root). 'group' is the directory (core|apps). 'hints' power target-repo inference in step 4: match against Jira components, labels, and free text. Add a repo by appending here AND to the REPOS array in scripts/setup-repos.sh, then run the setup script and commit the resulting .gitmodules change. URLs are https://github.com/... for portability; the private repos require a git environment with access to them.",
+  "$comment": "Registry of repositories the jira-bug-analysis skill analyzes. Each repo is a git submodule of this repo at 'path' (relative to the repo root). 'group' is the directory (core|apps). 'hints' power target-repo inference in step 4: match against Jira components, labels, and free text. Add a repo by appending here AND to the REPOS array in scripts/setup-repos.sh, then run the setup script and commit the resulting .gitmodules change. URLs use the git@github.com: (SSH) form; the private repos require a git environment with access to them.",
   "repos": [
     {
       "name": "developerhub-ui",
       "group": "core",
       "path": "core/developerhub-ui",
-      "url": "https://github.com/contentstack/developerhub-ui.git",
+      "url": "git@github.com:contentstack/developerhub-ui.git",
       "visibility": "private",
       "purpose": "Developer Hub UI — building, configuring, and hosting Contentstack marketplace apps (app manifest, UI locations, OAuth, webhooks, hosting).",
       "hints": {
@@ -18,7 +18,7 @@
       "name": "marketplace-ui",
       "group": "core",
       "path": "core/marketplace-ui",
-      "url": "https://github.com/contentstack/marketplace-ui.git",
+      "url": "git@github.com:contentstack/marketplace-ui.git",
       "visibility": "private",
       "purpose": "Marketplace UI — app catalog/listing, installation flow, app store surfaces inside Contentstack.",
       "hints": {
@@ -31,7 +31,7 @@
       "name": "marketplace-jsoneditor-app",
       "group": "apps",
       "path": "apps/marketplace-jsoneditor-app",
-      "url": "https://github.com/contentstack/marketplace-jsoneditor-app.git",
+      "url": "git@github.com:contentstack/marketplace-jsoneditor-app.git",
       "visibility": "public",
       "purpose": "JSON Editor marketplace app — custom field extension for editing JSON in entries.",
       "hints": {
@@ -44,7 +44,7 @@
       "name": "marketplace-brightcove-app",
       "group": "apps",
       "path": "apps/marketplace-brightcove-app",
-      "url": "https://github.com/contentstack/marketplace-brightcove-app.git",
+      "url": "git@github.com:contentstack/marketplace-brightcove-app.git",
       "visibility": "private",
       "purpose": "Brightcove marketplace app — integrates Brightcove video assets into Contentstack entries.",
       "hints": {

@@ -15,20 +15,20 @@
 # repo can't be reached, it's reported and the script keeps going. After the
 # script adds new submodules, commit the resulting .gitmodules + gitlink change.
 #
-# URLs use https://github.com/... for portability; switch to git@github.com:
-# form if your environment authenticates over SSH.
+# URLs use the git@github.com: (SSH) form; ensure your environment has an SSH
+# key with access to the private repos.
 
 set -uo pipefail
 
 ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "!! run inside the repo"; exit 1; }
 cd "$ROOT"
 
-# group/path|https-url
+# path|ssh-url
 REPOS=(
-  "core/developerhub-ui|https://github.com/contentstack/developerhub-ui.git"
-  "core/marketplace-ui|https://github.com/contentstack/marketplace-ui.git"
-  "apps/marketplace-jsoneditor-app|https://github.com/contentstack/marketplace-jsoneditor-app.git"
-  "apps/marketplace-brightcove-app|https://github.com/contentstack/marketplace-brightcove-app.git"
+  "core/developerhub-ui|git@github.com:contentstack/developerhub-ui.git"
+  "core/marketplace-ui|git@github.com:contentstack/marketplace-ui.git"
+  "apps/marketplace-jsoneditor-app|git@github.com:contentstack/marketplace-jsoneditor-app.git"
+  "apps/marketplace-brightcove-app|git@github.com:contentstack/marketplace-brightcove-app.git"
 )
 
 added=0; inited=0; failed=0
