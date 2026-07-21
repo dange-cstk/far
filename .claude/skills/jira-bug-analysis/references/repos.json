@@ -1,0 +1,55 @@
+{
+  "$comment": "Registry of repositories the jira-bug-analysis skill can analyze. 'group' controls the local directory (core -> <workspace>/core, apps -> <workspace>/apps). 'hints' power target-repo inference in step 4: match against Jira components, labels, and free text. Add more repos here to extend coverage; keep clone URLs as https://github.com/... so the session git proxy rewrite applies.",
+  "workspaceEnv": "BUG_ANALYSIS_WORKSPACE",
+  "workspaceDefault": "$HOME",
+  "repos": [
+    {
+      "name": "developerhub-ui",
+      "group": "core",
+      "clone": "https://github.com/contentstack/developerhub-ui.git",
+      "visibility": "private",
+      "purpose": "Developer Hub UI — building, configuring, and hosting Contentstack marketplace apps (app manifest, UI locations, OAuth, webhooks, hosting).",
+      "hints": {
+        "components": ["Developer Hub", "DeveloperHub", "App Development"],
+        "labels": ["developerhub", "developer-hub", "app-config"],
+        "keywords": ["developer hub", "developerhub", "app manifest", "ui location", "app configuration", "oauth", "webhook", "hosting", "app sdk"]
+      }
+    },
+    {
+      "name": "marketplace-ui",
+      "group": "core",
+      "clone": "https://github.com/contentstack/marketplace-ui.git",
+      "visibility": "private",
+      "purpose": "Marketplace UI — app catalog/listing, installation flow, app store surfaces inside Contentstack.",
+      "hints": {
+        "components": ["Marketplace", "Marketplace UI", "App Store"],
+        "labels": ["marketplace", "marketplace-ui", "app-install"],
+        "keywords": ["marketplace", "app listing", "install app", "uninstall", "app store", "catalog", "app details page"]
+      }
+    },
+    {
+      "name": "marketplace-jsoneditor-app",
+      "group": "apps",
+      "clone": "https://github.com/contentstack/marketplace-jsoneditor-app.git",
+      "visibility": "public",
+      "purpose": "JSON Editor marketplace app — custom field extension for editing JSON in entries.",
+      "hints": {
+        "components": ["JSON Editor", "JSON Editor App"],
+        "labels": ["jsoneditor", "json-editor"],
+        "keywords": ["json editor", "jsoneditor", "json field", "custom field", "json schema"]
+      }
+    },
+    {
+      "name": "marketplace-brightcove-app",
+      "group": "apps",
+      "clone": "https://github.com/contentstack/marketplace-brightcove-app.git",
+      "visibility": "private",
+      "purpose": "Brightcove marketplace app — integrates Brightcove video assets into Contentstack entries.",
+      "hints": {
+        "components": ["Brightcove", "Brightcove App"],
+        "labels": ["brightcove"],
+        "keywords": ["brightcove", "video", "video player", "playlist", "video asset"]
+      }
+    }
+  ]
+}
