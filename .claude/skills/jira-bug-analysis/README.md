@@ -7,13 +7,17 @@ and opens a **draft pull request**.
 ## What it does
 
 1. Fetches the ticket from Jira (Atlassian Rovo MCP).
-2. Ensures the target repos are cloned locally (two groups: `core`, `apps`).
-3. Infers which repo the bug lives in (and confirms with you).
+2. Determines the target GitHub repo — **inferring it from the ticket**, or
+   **asking you for the repo URL** when it isn't sure.
+3. **Clones that repo at runtime** into a gitignored `work/` dir.
 4. Reads the code, root-causes the bug, and writes a structured report.
 5. Optionally implements a minimal fix on a branch and opens a draft PR.
 6. Optionally posts the report back to the Jira ticket as a comment.
 
 Every write action (push, PR, Jira comment) is gated on your confirmation.
+
+No repos are hardcoded — repositories change over time, so the skill resolves
+and clones the right one per ticket instead of tracking a fixed list.
 
 ## Layout
 
@@ -22,15 +26,10 @@ jira-bug-analysis/
   SKILL.md                     # the skill instructions (entry point)
   README.md                    # this file
   references/
-    repos.json                 # repo registry + mapping hints (extend to add repos)
     report-template.md         # First Analysis Report structure
   scripts/
-    setup-repos.sh             # add/init the core & apps repos as submodules
+    clone-repo.sh              # runtime clone of a given repo into work/<name>
 ```
-
-The analysis repos are **git submodules** of this repo, under `core/` and
-`apps/` at the repo root. Populate them with `git submodule update --init
---recursive` or the setup script.
 
 ## Usage
 
@@ -40,13 +39,15 @@ The analysis repos are **git submodules** of this repo, under `core/` and
 
 or just: "Analyze the bug in DX-1234 and propose a fix."
 
+If the skill can't tell which repo the bug is in, it will ask you for the GitHub
+repo URL (a full URL or `owner/repo` shorthand), then clone it.
+
 ## Requirements & notes
 
 - The Atlassian (Rovo) MCP must be connected for Jira access.
-- **Private repos only initialize in an environment with access to them.** In a
-  session scoped to a different owner, `setup-repos.sh` adds/inits the public
-  submodule and reports the private ones as out-of-scope. Run it locally or in a
-  session scoped to those repos to complete the private submodules, then commit
-  the `.gitmodules` change.
-- Add more repos by appending to `references/repos.json` and the `REPOS` array in
-  `scripts/setup-repos.sh`.
+- The environment needs git access to the target repo (public, or an SSH
+  key / token with org access for private repos). If a clone fails for lack of
+  access, the skill reports it rather than guessing.
+- **Version bump:** when the target repo is a marketplace *app* (detected by a
+  `@contentstack/app-sdk` dependency), a fix also bumps `package.json` (patch by
+  default). Platform/library repos are not bumped.

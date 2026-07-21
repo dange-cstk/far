@@ -1,3 +1,6 @@
+# Runtime clones made by the jira-bug-analysis skill
+/work/
+
 # Analysis reports produced by the jira-bug-analysis skill
 /reports/
 *-analysis.md
