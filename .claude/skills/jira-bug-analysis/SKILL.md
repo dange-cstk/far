@@ -127,6 +127,13 @@ refactor or architectural change):
 - make the **minimal** correct change, matching the repo's existing style,
 - add or update tests that would have caught the bug,
 - run the repo's linters/tests if available,
+- **if the target repo is in the `apps` group (see `group` in
+  `references/repos.json`), bump the version in its `package.json`.** A bug fix
+  is a **patch** bump by default — run `npm version patch --no-git-tag-version`
+  at the app root (updates `package.json`, and the lockfile if present, without
+  creating a git tag/commit). Use minor/major only if the change clearly
+  warrants it. `core` repos are **not** version-bumped. Include the bump in the
+  fix commit,
 - commit with a clear message referencing the ticket (e.g.
   `fix(<area>): <summary> [<TICKET>]`).
 
