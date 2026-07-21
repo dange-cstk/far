@@ -29,6 +29,7 @@ REPOS=(
   "core/marketplace-ui|git@github.com:contentstack/marketplace-ui.git"
   "apps/marketplace-jsoneditor-app|git@github.com:contentstack/marketplace-jsoneditor-app.git"
   "apps/marketplace-brightcove-app|git@github.com:contentstack/marketplace-brightcove-app.git"
+  "apps/custom-asset-field|git@github.com:contentstack/custom-asset-field.git"
 )
 
 added=0; inited=0; failed=0

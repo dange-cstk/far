@@ -52,6 +52,19 @@
         "labels": ["brightcove"],
         "keywords": ["brightcove", "video", "video player", "playlist", "video asset"]
       }
+    },
+    {
+      "name": "custom-asset-field",
+      "group": "apps",
+      "path": "apps/custom-asset-field",
+      "url": "git@github.com:contentstack/custom-asset-field.git",
+      "visibility": "private",
+      "purpose": "Custom Asset Field marketplace app — custom field for selecting and referencing assets within entries.",
+      "hints": {
+        "components": ["Custom Asset Field", "Asset Field"],
+        "labels": ["custom-asset-field", "asset-field"],
+        "keywords": ["custom asset", "asset field", "asset picker", "select asset", "asset reference", "custom field", "custom-asset-field"]
+      }
     }
   ]
 }
